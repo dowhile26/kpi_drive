@@ -32,13 +32,14 @@ class TasksCubit extends Cubit<TasksState> {
   }) async {
     if (fromParentId == toParentId && fromIndex == toIndex) return;
     final state_ = state as TasksLoaded;
-    final newTasks = Map<int?, List<Task>>.from(state_.tasks);
-    final newOrder = (fromIndex != toIndex || fromParentId != toParentId) ? toIndex + 1 : fromIndex;
+    final newTasks = Map<int?, List<Task>>.of(state_.tasks);
     if (fromParentId == toParentId && fromIndex < toIndex) {
       toIndex -= 1;
     }
-    Task? task;
-    task = newTasks[fromParentId]!.removeAt(fromIndex).copyWith(parentId: toParentId, order: newOrder);
+
+    toIndex = toIndex.clamp(0, newTasks[toParentId]!.length);
+    final newOrder = toIndex + 1;
+    final task = newTasks[fromParentId]!.removeAt(fromIndex).copyWith(parentId: toParentId, order: newOrder);
     newTasks[toParentId]!.insert(toIndex, task);
 
     emit(TasksLoaded(tasks: newTasks, parentNames: state_.parentNames, sortedParentIds: state_.sortedParentIds));
